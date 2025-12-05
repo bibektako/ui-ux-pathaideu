@@ -1,0 +1,11 @@
+Global ignores
+.DS_Store
+
+# Backend Node.js ignores
+/backend/node_modules
+/backend/package-lock.json
+
+# Frontend React Native ignores
+/frontend/node_modules
+/frontend/android
+/frontend/ios
