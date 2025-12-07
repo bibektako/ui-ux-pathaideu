@@ -1,50 +1,109 @@
-# Welcome to your Expo app 👋
+# Pathaideu Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native mobile application for the Pathaideu peer-to-peer package delivery system.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node.js (v16+)
+- Expo CLI (`npm install -g expo-cli`)
+- iOS Simulator (for Mac) or Android Studio (for Android development)
+- Backend server running and accessible via LAN IP
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Installation
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Configuration
 
-## Learn more
+1. Update backend IP in Settings screen after first launch
+2. Default backend IP: `http://192.168.1.100:3000` (change to your server's LAN IP)
 
-To learn more about developing your project with Expo, look at the following resources:
+## Running
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+# Start Expo development server
+npm start
 
-## Join the community
+# Run on iOS
+npm run ios
 
-Join our community of developers creating universal apps.
+# Run on Android
+npm run android
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+# Run on web (limited functionality)
+npm run web
+```
+
+## Project Structure
+
+```
+src/
+├── state/
+│   └── useAuthStore.js          # Zustand auth state management
+├── screens/
+│   ├── LoginScreen.js           # User login
+│   ├── RegisterScreen.js        # User registration
+│   ├── HomeScreen.js            # Dashboard
+│   ├── CreatePackageScreen.js  # Create package listing
+│   ├── CreateTripScreen.js     # Create trip
+│   ├── PackageListScreen.js    # Browse packages
+│   ├── PackageDetailScreen.js  # Package details & actions
+│   ├── CaptureScreen.js        # Camera/photo capture
+│   ├── TrackingScreen.js       # Real-time GPS tracking
+│   ├── WalletScreen.js          # Wallet management
+│   ├── ProfileScreen.js         # User profile
+│   ├── AdminPanelScreen.js     # Admin functions
+│   └── SettingsScreen.js       # App settings
+├── components/
+│   ├── CameraView.js            # Camera component
+│   └── MapView.js              # MapLibre map component
+├── services/
+│   ├── api.js                  # Axios API client
+│   ├── auth.js                 # Authentication service
+│   ├── packages.js             # Package service
+│   ├── trips.js                # Trip service
+│   └── wallet.js               # Wallet service
+└── utils/
+    └── gps.js                  # GPS/location utilities
+```
+
+## Features
+
+### User Roles
+
+- **Sender**: Create packages, track deliveries, manage wallet
+- **Traveller**: Create trips, accept packages, track deliveries
+- **Admin**: Verify users, resolve disputes, manage system
+
+### Key Features
+
+- User authentication & registration
+- Package creation & matching
+- Trip creation & package acceptance
+- Real-time GPS tracking with MapLibre
+- Wallet management (top-up, escrow)
+- Photo capture for verification & proof
+- Admin verification panel
+- Settings for backend IP configuration
+
+## Permissions Required
+
+- **Location**: For GPS tracking and route matching
+- **Camera**: For photo capture (ID verification, package photos)
+- **Photo Library**: For selecting images
+
+## Notes
+
+- App connects to backend via LAN IP (configure in Settings)
+- All data stored locally on device (AsyncStorage for auth)
+- MapLibre uses OpenStreetMap (no API key required)
+- Camera requires physical device (not available in simulator)
+
+## Troubleshooting
+
+1. **Backend connection failed**: Check backend IP in Settings, ensure both devices on same network
+2. **Location not working**: Grant location permissions in device settings
+3. **Camera not working**: Use physical device (not simulator)
+4. **Map not loading**: Check internet connection (OSM tiles require internet)
