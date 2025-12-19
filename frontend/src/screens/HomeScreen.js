@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  TextInput,
   Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -88,14 +87,14 @@ const HomeScreen = () => {
           <Text style={styles.greeting}>Hi {user?.name?.split(' ')[0] || 'User'}</Text>
         </View>
         
-        <View style={styles.searchContainer}>
+        <TouchableOpacity
+          style={styles.searchContainer}
+          activeOpacity={0.8}
+          onPress={() => router.push('/search')}
+        >
           <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="search..."
-            placeholderTextColor="#999"
-          />
-        </View>
+          <Text style={styles.searchPlaceholder}>Search by Track ID...</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Ads/Coupons Section */}
@@ -130,7 +129,7 @@ const HomeScreen = () => {
 
         <TouchableOpacity
           style={styles.serviceCard}
-          onPress={() => router.push('/create-trip')}
+          onPress={() => router.push('/carry-package')}
         >
           <View style={styles.serviceIcon}>
             <Text style={styles.serviceIconText}>📈</Text>
@@ -226,6 +225,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#333'
+  },
+  searchPlaceholder: {
+    flex: 1,
+    fontSize: 16,
+    color: '#999'
   },
   adsSection: {
     flexDirection: 'row',
