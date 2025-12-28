@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import packagesService from '../services/packages';
 import { useRouter } from 'expo-router';
+import Header from '../components/Header';
 
 const SearchPackageScreen = () => {
   const router = useRouter();
@@ -94,7 +95,9 @@ const SearchPackageScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+    <View style={styles.wrapper}>
+      <Header title="Search" />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
       <View
         style={[
           styles.searchBox,
@@ -124,11 +127,16 @@ const SearchPackageScreen = () => {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {renderCard()}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: '#FFFFFF'
+  },
   container: {
     padding: 16,
     backgroundColor: '#FFFFFF',

@@ -10,19 +10,16 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import packagesService from '../services/packages';
+import tripsService from '../services/trips';
 import Header from '../components/Header';
 
 const statusMeta = {
-  delivered: { label: 'Delivered', color: '#0B63E6', bg: '#E6F0FF' },
+  completed: { label: 'Completed', color: '#0B63E6', bg: '#E6F0FF' },
   cancelled: { label: 'Cancelled', color: '#E53935', bg: '#FCE8E6' },
-  picked_up: { label: 'Picked Up', color: '#0B63E6', bg: '#E6F0FF' },
-  in_transit: { label: 'In Transit', color: '#0B63E6', bg: '#E6F0FF' },
-  accepted: { label: 'Accepted', color: '#0B63E6', bg: '#E6F0FF' },
-  pending: { label: 'Pending', color: '#9CA3AF', bg: '#F3F4F6' }
+  active: { label: 'Active', color: '#0B63E6', bg: '#E6F0FF' }
 };
 
-const HistoryScreen = () => {
+const TripHistoryScreen = () => {
   const router = useRouter();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,10 +28,10 @@ const HistoryScreen = () => {
   const load = async () => {
     try {
       setLoading(true);
-      const data = await packagesService.historyMine();
+      const data = await tripsService.historyMine();
       setItems(data || []);
     } catch (error) {
-      console.error('Failed to load history', error);
+      console.error('Failed to load trip history', error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +58,7 @@ const HistoryScreen = () => {
   };
 
   const renderStatusBadge = (status) => {
-    const meta = statusMeta[status] || statusMeta.pending;
+    const meta = statusMeta[status] || statusMeta.active;
     return (
       <View style={[styles.badge, { backgroundColor: meta.bg }]}>
         <Text style={[styles.badgeText, { color: meta.color }]}>{meta.label}</Text>
@@ -71,17 +68,14 @@ const HistoryScreen = () => {
 
   const renderIcon = (status) => {
     if (status === 'cancelled') return <Ionicons name="close-circle-outline" size={18} color="#E53935" />;
-    if (status === 'delivered') return <Ionicons name="checkmark-done-circle-outline" size={18} color="#0B63E6" />;
-    if (status === 'picked_up' || status === 'in_transit' || status === 'accepted') {
-      return <Ionicons name="cube-outline" size={18} color="#0B63E6" />;
-    }
-    return <Ionicons name="cube-outline" size={18} color="#9CA3AF" />;
+    if (status === 'completed') return <Ionicons name="checkmark-done-circle-outline" size={18} color="#0B63E6" />;
+    return <Ionicons name="car-outline" size={18} color="#0B63E6" />;
   };
 
   if (loading) {
     return (
       <View style={styles.container}>
-        <Header title="History" />
+        <Header title="Trip" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#0B63E6" />
         </View>
@@ -91,45 +85,57 @@ const HistoryScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Header title="History" />
+      <Header title="Trip" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-      {items.map((pkg) => (
+      {items.map((trip) => (
         <TouchableOpacity
-          key={pkg._id}
+          key={trip._id}
           style={styles.card}
-          onPress={() => router.push(`/package-detail/${pkg._id}`)}
+          onPress={() => {
+            // Navigate to trip details if needed
+            console.log('Trip details:', trip._id);
+          }}
         >
           <View style={styles.topRow}>
             <View style={styles.iconWrapper}>
-              {renderIcon(pkg.status)}
+              {renderIcon(trip.status)}
             </View>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>{pkg.description || 'Package'}</Text>
-              <Text style={styles.date}>{formatDate(pkg.createdAt)}</Text>
+              <Text style={styles.title}>
+                {trip.origin?.city} → {trip.destination?.city}
+              </Text>
+              <Text style={styles.date}>{formatDate(trip.departureDate)}</Text>
             </View>
-            {renderStatusBadge(pkg.status)}
+            {renderStatusBadge(trip.status)}
           </View>
 
           <View style={styles.lineRow}>
             <Text style={styles.label}>Route:</Text>
             <Text style={styles.value}>
-              {pkg.origin?.city} → {pkg.destination?.city}
+              {trip.origin?.address} → {trip.destination?.address}
             </Text>
           </View>
 
           <View style={styles.lineRow}>
-            <Text style={styles.label}>Amount:</Text>
-            <Text style={styles.value}>Rs {pkg.fee}</Text>
+            <Text style={styles.label}>Price:</Text>
+            <Text style={styles.value}>Rs {trip.price}</Text>
+          </View>
+
+          <View style={styles.lineRow}>
+            <Text style={styles.label}>Packages:</Text>
+            <Text style={styles.value}>
+              {trip.acceptedPackages?.length || 0} / {trip.capacity}
+            </Text>
           </View>
         </TouchableOpacity>
       ))}
 
       {items.length === 0 && (
-        <Text style={styles.empty}>No history yet.</Text>
+        <Text style={styles.empty}>No trip history yet.</Text>
       )}
       </ScrollView>
     </View>
@@ -179,9 +185,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 8
   },
-  icon: {
-    fontSize: 18
-  },
   titleWrap: {
     flex: 1
   },
@@ -224,6 +227,5 @@ const styles = StyleSheet.create({
   }
 });
 
-export default HistoryScreen;
-
+export default TripHistoryScreen;
 

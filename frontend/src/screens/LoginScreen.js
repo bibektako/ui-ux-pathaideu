@@ -5,41 +5,51 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import authService from "../services/auth";
+import { useToast, useLoading } from "../context/ToastContext";
 
 const { width } = Dimensions.get("window");
 
 const LoginScreen = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { showError, showSuccess } = useToast();
+  const { showLoading, hideLoading } = useLoading();
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!email || !password) {
+      showError("Please fill in all fields");
       return;
     }
 
     setLoading(true);
+    showLoading('Logging in...');
     try {
-      const { user } = await authService.login(username, password);
-      // Redirect based on user role
-      if (user?.role === 'admin') {
-        router.replace('/admin');
-      } else {
-        router.replace("/(tabs)");
-      }
+      const { user } = await authService.login(email, password);
+      hideLoading();
+      showSuccess("Login successful!");
+      // Small delay for better UX (Peak-End Rule - positive ending)
+      setTimeout(() => {
+        // Redirect based on user role
+        if (user?.role === 'admin') {
+          router.replace('/admin');
+        } else {
+          router.replace("/(tabs)");
+        }
+      }, 300);
     } catch (error) {
-      Alert.alert("Login Failed", error.response?.data?.error || error.message);
+      hideLoading();
+      showError(error.response?.data?.error || error.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -69,7 +79,7 @@ const LoginScreen = () => {
         {/* Logo - Top Left */}
         <View style={styles.logoContainer}>
           <View style={styles.logoBox}>
-            <Text style={styles.logoIcon}>🚚</Text>
+            <Ionicons name="car-outline" size={28} color="#0047AB" />
           </View>
           <Text style={styles.logoText}>Pathaideu</Text>
         </View>
@@ -83,42 +93,56 @@ const LoginScreen = () => {
         </Text>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            placeholderTextColor="#999"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoComplete="username"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.passwordInput}
-              placeholder="Enter your password"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              style={styles.eyeIcon}
-              onPress={() => setShowPassword(!showPassword)}
-            >
-              <Text style={styles.eyeIconText}>
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </Text>
-            </TouchableOpacity>
+          {/* Email Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Email</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="mail-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#BDC3C7"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
           </View>
+
+          {/* Password Input */}
+          <View style={styles.inputWrapper}>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="lock-closed-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#BDC3C7"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-outline" : "eye-off-outline"}
+                  size={20}
+                  color="#7F8C8D"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Forgot Password Link */}
           <TouchableOpacity
-            style={styles.forgotPassword}
             onPress={() => router.push("/forgot-password")}
+            style={styles.forgotPassword}
           >
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </TouchableOpacity>
@@ -130,7 +154,7 @@ const LoginScreen = () => {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#007AFF" />
+            <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.signInButtonText}>Sign In</Text>
           )}
@@ -160,7 +184,7 @@ const styles = StyleSheet.create({
   },
   topSection: {
     height: "35%",
-    backgroundColor: "#1E3A5F",
+    backgroundColor: "#0047AB",
     position: "relative",
     overflow: "hidden",
   },
@@ -181,7 +205,7 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   building: {
-    backgroundColor: "#4A90E2",
+    backgroundColor: "#0066CC",
     borderRadius: 2,
     marginHorizontal: 2,
   },
@@ -206,9 +230,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  logoIcon: {
-    fontSize: 28,
   },
   logoText: {
     color: "#fff",
@@ -243,22 +264,16 @@ const styles = StyleSheet.create({
   inputGroup: {
     marginBottom: 22,
   },
+  inputWrapper: {
+    marginBottom: 22,
+  },
   label: {
     fontSize: 14,
     fontWeight: "600",
     color: "#2C3E50",
     marginBottom: 10,
   },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    borderWidth: 1.5,
-    borderColor: "#E8ECF4",
-    color: "#2C3E50",
-  },
-  passwordContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -266,36 +281,39 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#E8ECF4",
   },
-  passwordInput: {
+  inputIcon: {
+    paddingLeft: 16,
+  },
+  input: {
     flex: 1,
     padding: 16,
+    paddingLeft: 12,
     fontSize: 16,
     color: "#2C3E50",
   },
   eyeIcon: {
     padding: 16,
     paddingLeft: 12,
-  },
-  eyeIconText: {
-    fontSize: 22,
+    paddingRight: 16,
   },
   forgotPassword: {
     alignSelf: "flex-end",
     marginTop: 10,
   },
   forgotPasswordText: {
-    color: "#007AFF",
+    color: "#0047AB",
     fontSize: 14,
     fontWeight: "500",
   },
   signInButton: {
-    backgroundColor: "#1E3A5F",
+    backgroundColor: "#0047AB",
     borderRadius: 12,
     padding: 18,
     alignItems: "center",
     marginTop: 15,
     marginBottom: 25,
-    shadowColor: "#1E3A5F",
+    minHeight: 56,
+    shadowColor: "#0047AB",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -338,7 +356,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   registerLinkButton: {
-    color: "#007AFF",
+    color: "#0047AB",
     fontSize: 15,
     fontWeight: "600",
   },

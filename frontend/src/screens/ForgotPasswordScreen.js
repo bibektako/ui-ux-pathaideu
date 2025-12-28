@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import authService from '../services/auth';
+import { useToast } from '../context/ToastContext';
 
 const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState('');
@@ -21,78 +21,127 @@ const ForgotPasswordScreen = () => {
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const router = useRouter();
+  const { showError, showSuccess } = useToast();
+
+  const validateField = (field, value) => {
+    const newErrors = { ...errors };
+    switch (field) {
+      case 'email':
+        if (!value?.trim()) {
+          newErrors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          newErrors.email = 'Please enter a valid email address';
+        } else {
+          delete newErrors.email;
+        }
+        break;
+      case 'otp':
+        if (!value?.trim()) {
+          newErrors.otp = 'OTP is required';
+        } else if (value.length !== 6) {
+          newErrors.otp = 'OTP must be 6 digits';
+        } else {
+          delete newErrors.otp;
+        }
+        break;
+      case 'newPassword':
+        if (!value?.trim()) {
+          newErrors.newPassword = 'Password is required';
+        } else if (value.length < 6) {
+          newErrors.newPassword = 'Password must be at least 6 characters';
+        } else {
+          delete newErrors.newPassword;
+        }
+        // Re-validate confirm password if it exists
+        if (confirmPassword) {
+          validateField('confirmPassword', confirmPassword);
+        }
+        break;
+      case 'confirmPassword':
+        if (!value?.trim()) {
+          newErrors.confirmPassword = 'Please confirm your password';
+        } else if (newPassword && value !== newPassword) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+    }
+    setErrors(newErrors);
+  };
 
   const handleSendEmail = async () => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email address');
+    validateField('email', email);
+    
+    if (!email?.trim()) {
+      showError('Please enter your email address');
       return;
     }
 
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+    if (!emailRegex.test(email.trim())) {
+      showError('Please enter a valid email address');
+      return;
+    }
+
+    if (errors.email) {
       return;
     }
 
     setLoading(true);
     try {
-      await authService.forgotPassword(email);
+      await authService.forgotPassword(email.trim());
       setEmailSent(true);
-      Alert.alert(
-        'Email Sent',
-        'Please check your email for password reset instructions.'
-      );
+      showSuccess('OTP sent! Please check your email for the 6-digit code.');
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || error.message || 'Failed to send email. Please try again.'
-      );
+      showError(error.response?.data?.error || error.message || 'Failed to send email. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyAndReset = async () => {
-    if (!otp || !newPassword || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+    // Validate all fields
+    validateField('otp', otp);
+    validateField('newPassword', newPassword);
+    validateField('confirmPassword', confirmPassword);
+
+    if (!otp?.trim() || !newPassword?.trim() || !confirmPassword?.trim()) {
+      showError('Please fill in all fields');
       return;
     }
 
     if (otp.length !== 6) {
-      Alert.alert('Error', 'OTP must be 6 digits');
+      showError('OTP must be 6 digits');
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      showError('Password must be at least 6 characters');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showError('Passwords do not match');
+      return;
+    }
+
+    // Check if there are any validation errors
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     setLoading(true);
     try {
-      await authService.resetPasswordWithOtp(email, otp, newPassword);
-      Alert.alert(
-        'Success',
-        'Password updated. You can now log in with the new password.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/login')
-          }
-        ]
-      );
+      await authService.resetPasswordWithOtp(email.trim(), otp, newPassword);
+      showSuccess('Password updated successfully! Redirecting to login...');
+      setTimeout(() => {
+        router.replace('/login');
+      }, 2000);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || error.message || 'Invalid code or request. Please try again.'
-      );
+      showError(error.response?.data?.error || error.message || 'Invalid code or request. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -119,16 +168,21 @@ const ForgotPasswordScreen = () => {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Email</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.email && styles.inputError]}
               placeholder="Enter your email"
               placeholderTextColor="#999"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                validateField('email', text);
+              }}
+              onBlur={() => validateField('email', email)}
               keyboardType="email-address"
               autoCapitalize="none"
               autoComplete="email"
               editable={!loading && !emailSent}
             />
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
 
           {!emailSent && (
@@ -150,44 +204,59 @@ const ForgotPasswordScreen = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Enter OTP</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.otp && styles.inputError]}
                   placeholder="6-digit code"
                   placeholderTextColor="#999"
                   value={otp}
-                  onChangeText={setOtp}
+                  onChangeText={(text) => {
+                    setOtp(text);
+                    validateField('otp', text);
+                  }}
+                  onBlur={() => validateField('otp', otp)}
                   keyboardType="number-pad"
                   maxLength={6}
                   autoCapitalize="none"
                   editable={!loading}
                 />
+                {errors.otp && <Text style={styles.errorText}>{errors.otp}</Text>}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>New Password</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.newPassword && styles.inputError]}
                   placeholder="Enter new password"
                   placeholderTextColor="#999"
                   value={newPassword}
-                  onChangeText={setNewPassword}
+                  onChangeText={(text) => {
+                    setNewPassword(text);
+                    validateField('newPassword', text);
+                  }}
+                  onBlur={() => validateField('newPassword', newPassword)}
                   secureTextEntry
                   autoCapitalize="none"
                   editable={!loading}
                 />
+                {errors.newPassword && <Text style={styles.errorText}>{errors.newPassword}</Text>}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Confirm New Password</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.confirmPassword && styles.inputError]}
                   placeholder="Confirm new password"
                   placeholderTextColor="#999"
                   value={confirmPassword}
-                  onChangeText={setConfirmPassword}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text);
+                    validateField('confirmPassword', text);
+                  }}
+                  onBlur={() => validateField('confirmPassword', confirmPassword)}
                   secureTextEntry
                   autoCapitalize="none"
                   editable={!loading}
                 />
+                {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
               </View>
 
               <TouchableOpacity
@@ -291,6 +360,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#E8ECF4',
     color: '#2C3E50'
+  },
+  inputError: {
+    borderColor: '#F44336'
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 12,
+    marginTop: 5,
+    marginLeft: 4
   },
   sendButton: {
     backgroundColor: '#007AFF',

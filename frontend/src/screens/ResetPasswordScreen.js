@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import authService from '../services/auth';
+import { useToast } from '../context/ToastContext';
 
 const ResetPasswordScreen = () => {
   const { token } = useLocalSearchParams();
@@ -21,49 +21,80 @@ const ResetPasswordScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const router = useRouter();
+  const { showError, showSuccess } = useToast();
 
   useEffect(() => {
     if (!token) {
-      Alert.alert('Error', 'Invalid reset link. Please request a new password reset.');
+      showError('Invalid reset link. Please request a new password reset.');
       router.replace('/forgot-password');
     }
   }, [token]);
 
+  const validateField = (field, value) => {
+    const newErrors = { ...errors };
+    switch (field) {
+      case 'newPassword':
+        if (!value?.trim()) {
+          newErrors.newPassword = 'Password is required';
+        } else if (value.length < 6) {
+          newErrors.newPassword = 'Password must be at least 6 characters';
+        } else {
+          delete newErrors.newPassword;
+        }
+        // Re-validate confirm password if it exists
+        if (confirmPassword) {
+          validateField('confirmPassword', confirmPassword);
+        }
+        break;
+      case 'confirmPassword':
+        if (!value?.trim()) {
+          newErrors.confirmPassword = 'Please confirm your password';
+        } else if (newPassword && value !== newPassword) {
+          newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete newErrors.confirmPassword;
+        }
+        break;
+    }
+    setErrors(newErrors);
+  };
+
   const handleResetPassword = async () => {
-    if (!newPassword || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+    // Validate all fields
+    validateField('newPassword', newPassword);
+    validateField('confirmPassword', confirmPassword);
+
+    if (!newPassword?.trim() || !confirmPassword?.trim()) {
+      showError('Please fill in all fields');
       return;
     }
 
     if (newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      showError('Password must be at least 6 characters');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showError('Passwords do not match');
+      return;
+    }
+
+    // Check if there are any validation errors
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
     setLoading(true);
     try {
       await authService.resetPassword(token, newPassword);
-      Alert.alert(
-        'Success',
-        'Your password has been reset successfully. You can now login with your new password.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/login')
-          }
-        ]
-      );
+      showSuccess('Password reset successfully! Redirecting to login...');
+      setTimeout(() => {
+        router.replace('/login');
+      }, 2000);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || error.message || 'Failed to reset password. The link may have expired.'
-      );
+      showError(error.response?.data?.error || error.message || 'Failed to reset password. The link may have expired.');
     } finally {
       setLoading(false);
     }
@@ -91,13 +122,17 @@ const ResetPasswordScreen = () => {
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>New Password</Text>
-            <View style={styles.passwordContainer}>
+            <View style={[styles.passwordContainer, errors.newPassword && styles.inputError]}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Enter your new password"
                 placeholderTextColor="#999"
                 value={newPassword}
-                onChangeText={setNewPassword}
+                onChangeText={(text) => {
+                  setNewPassword(text);
+                  validateField('newPassword', text);
+                }}
+                onBlur={() => validateField('newPassword', newPassword)}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 editable={!loading}
@@ -111,17 +146,22 @@ const ResetPasswordScreen = () => {
                 </Text>
               </TouchableOpacity>
             </View>
+            {errors.newPassword && <Text style={styles.errorText}>{errors.newPassword}</Text>}
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Confirm New Password</Text>
-            <View style={styles.passwordContainer}>
+            <View style={[styles.passwordContainer, errors.confirmPassword && styles.inputError]}>
               <TextInput
                 style={styles.passwordInput}
                 placeholder="Confirm your new password"
                 placeholderTextColor="#999"
                 value={confirmPassword}
-                onChangeText={setConfirmPassword}
+                onChangeText={(text) => {
+                  setConfirmPassword(text);
+                  validateField('confirmPassword', text);
+                }}
+                onBlur={() => validateField('confirmPassword', confirmPassword)}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 editable={!loading}
@@ -135,6 +175,7 @@ const ResetPasswordScreen = () => {
                 </Text>
               </TouchableOpacity>
             </View>
+            {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
           </View>
 
           <TouchableOpacity
@@ -218,6 +259,15 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#E8ECF4'
   },
+  inputError: {
+    borderColor: '#F44336'
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 12,
+    marginTop: 5,
+    marginLeft: 4
+  },
   passwordInput: {
     flex: 1,
     padding: 16,
@@ -272,6 +322,7 @@ const styles = StyleSheet.create({
 });
 
 export default ResetPasswordScreen;
+
 
 
 

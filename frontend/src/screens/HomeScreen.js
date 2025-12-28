@@ -9,9 +9,13 @@ import {
   Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import useAuthStore from '../state/useAuthStore';
 import packagesService from '../services/packages';
 import tripsService from '../services/trips';
+import adsService from '../services/ads';
+import AdCarousel from '../components/AdCarousel';
+import { getImageUri } from '../utils/imageUtils';
 
 const HomeScreen = () => {
   const { user } = useAuthStore();
@@ -20,6 +24,7 @@ const HomeScreen = () => {
   const [packages, setPackages] = useState([]);
   const [trips, setTrips] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [ads, setAds] = useState([]);
 
   useEffect(() => {
     loadData();
@@ -33,6 +38,10 @@ const HomeScreen = () => {
       
       const travellerTrips = await tripsService.list({ travellerId: user.id });
       setTrips(travellerTrips);
+
+      // Load active ads
+      const activeAds = await adsService.getActiveAds();
+      setAds(activeAds);
 
       // Create recent activity from packages and trips
       const activity = [];
@@ -70,6 +79,13 @@ const HomeScreen = () => {
     return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
   };
 
+  const getProfileImageSource = () => {
+    if (user?.profileImage) {
+      return { uri: getImageUri(user.profileImage) };
+    }
+    return { uri: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'User') + '&background=0047AB&color=fff' };
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -80,7 +96,7 @@ const HomeScreen = () => {
         <View style={styles.profileSection}>
           <View style={styles.profileImageContainer}>
             <Image
-              source={{ uri: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user?.name || 'User') + '&background=007AFF&color=fff' }}
+              source={getProfileImageSource()}
               style={styles.profileImage}
             />
           </View>
@@ -92,24 +108,27 @@ const HomeScreen = () => {
           activeOpacity={0.8}
           onPress={() => router.push('/search')}
         >
-          <Text style={styles.searchIcon}>🔍</Text>
-          <Text style={styles.searchPlaceholder}>Search by Track ID...</Text>
+          <Ionicons name="search-outline" size={18} color="#999" style={styles.searchIcon} />
+          <Text style={styles.searchPlaceholder}>search...</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Ads/Coupons Section */}
+      {/* Ads Section */}
       <View style={styles.adsSection}>
-        <View style={styles.adCardLarge}>
-          <Text style={styles.adPlaceholder}>Ad Space</Text>
-        </View>
-        <View style={styles.adCardSmall}>
-          <Text style={styles.adPlaceholder}>Coupon</Text>
-        </View>
+        {ads.length > 0 ? (
+          <AdCarousel ads={ads} style={styles.adCarousel} />
+        ) : (
+          <View style={styles.adCardSingle}>
+            <Text style={styles.adPlaceholder}>Ad Space</Text>
+          </View>
+        )}
       </View>
 
-      <TouchableOpacity style={styles.offersButton}>
-        <Text style={styles.offersButtonText}>Offers</Text>
-      </TouchableOpacity>
+      <View style={styles.offersContainer}>
+        <TouchableOpacity style={styles.offersButton}>
+          <Text style={styles.offersButtonText}>Offers</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Service Cards */}
       <View style={styles.servicesSection}>
@@ -118,13 +137,15 @@ const HomeScreen = () => {
           onPress={() => router.push('/create-package')}
         >
           <View style={styles.serviceIcon}>
-            <Text style={styles.serviceIconText}>📦</Text>
+            <Ionicons name="cube-outline" size={24} color="#007AFF" />
           </View>
           <View style={styles.serviceContent}>
             <Text style={styles.serviceTitle}>Send a Package</Text>
             <Text style={styles.serviceDescription}>Request someone to deliver your package</Text>
           </View>
-          <Text style={styles.serviceLink}>Start →</Text>
+          <TouchableOpacity onPress={() => router.push('/create-package')}>
+            <Text style={styles.serviceButton}>Start →</Text>
+          </TouchableOpacity>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -132,13 +153,15 @@ const HomeScreen = () => {
           onPress={() => router.push('/carry-package')}
         >
           <View style={styles.serviceIcon}>
-            <Text style={styles.serviceIconText}>📈</Text>
+            <Ionicons name="briefcase-outline" size={24} color="#007AFF" />
           </View>
           <View style={styles.serviceContent}>
             <Text style={styles.serviceTitle}>Carry a Package</Text>
             <Text style={styles.serviceDescription}>Earn money by delivering packages on your route</Text>
           </View>
-          <Text style={styles.serviceLink}>View →</Text>
+          <TouchableOpacity onPress={() => router.push('/carry-package')}>
+            <Text style={styles.serviceButton}>View →</Text>
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
 
@@ -186,8 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     paddingTop: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee'
+    paddingBottom: 20
   },
   profileSection: {
     flexDirection: 'row',
@@ -217,9 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12
   },
   searchIcon: {
-    fontSize: 18,
-    marginRight: 10,
-    color: '#999'
+    marginRight: 10
   },
   searchInput: {
     flex: 1,
@@ -232,20 +252,14 @@ const styles = StyleSheet.create({
     color: '#999'
   },
   adsSection: {
-    flexDirection: 'row',
     padding: 15,
-    gap: 10
+    paddingBottom: 15
   },
-  adCardLarge: {
-    flex: 2,
-    height: 120,
-    backgroundColor: '#4A90E2',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center'
+  adCarousel: {
+    marginBottom: 0
   },
-  adCardSmall: {
-    flex: 1,
+  adCardSingle: {
+    width: '100%',
     height: 120,
     backgroundColor: '#4A90E2',
     borderRadius: 12,
@@ -257,18 +271,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500'
   },
-  offersButton: {
-    backgroundColor: '#4A90E2',
-    marginHorizontal: 15,
+  offersContainer: {
+    paddingHorizontal: 15,
     marginBottom: 20,
-    paddingVertical: 10,
+    alignItems: 'flex-start'
+  },
+  offersButton: {
+    backgroundColor: '#E3F2FD',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
-    alignItems: 'center'
+    alignSelf: 'flex-start'
   },
   offersButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600'
+    color: '#333',
+    fontSize: 12,
+    fontWeight: '500'
   },
   servicesSection: {
     paddingHorizontal: 15,
@@ -282,22 +300,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2
   },
   serviceIcon: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#E6F0FF',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 15
-  },
-  serviceIconText: {
-    fontSize: 24
   },
   serviceContent: {
     flex: 1
@@ -312,10 +327,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666'
   },
-  serviceLink: {
+  serviceButton: {
     color: '#007AFF',
     fontSize: 14,
-    fontWeight: '600'
+    fontWeight: '500'
   },
   activitySection: {
     padding: 15,

@@ -7,17 +7,22 @@ import {
   ScrollView,
   TextInput,
   Image,
-  Alert,
   ActivityIndicator
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import useAuthStore from '../state/useAuthStore';
 import createAPI from '../services/api';
 import authService from '../services/auth';
+import Header from '../components/Header';
+import { useToast } from '../context/ToastContext';
+import { getImageUri } from '../utils/imageUtils';
 
 const ProfileScreen = () => {
   const { user, updateUser } = useAuthStore();
+  const { showError, showSuccess } = useToast();
+  const router = useRouter();
   const [idNumber, setIdNumber] = useState('');
   const [idPhoto, setIdPhoto] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -30,6 +35,7 @@ const ProfileScreen = () => {
   const [firstName, setFirstName] = useState(nameParts[0] || '');
   const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phone || '');
+  const [originalPhoneNumber, setOriginalPhoneNumber] = useState(user?.phone || '');
 
   useEffect(() => {
     const syncFromUser = async () => {
@@ -38,6 +44,7 @@ const ProfileScreen = () => {
         setFirstName(namePartsLocal[0] || '');
         setLastName(namePartsLocal.slice(1).join(' ') || '');
         setPhoneNumber(user.phone || '');
+        setOriginalPhoneNumber(user.phone || '');
 
         // Fetch existing ID verification submission (if any)
         try {
@@ -60,12 +67,6 @@ const ProfileScreen = () => {
     syncFromUser();
   }, [user]);
 
-  // Helper to get base URL for images from API client
-  const getBaseURL = () => {
-    const api = createAPI();
-    const baseURL = api?.defaults?.baseURL || '';
-    return baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL;
-  };
 
   const handleChangePhoto = async () => {
     try {
@@ -98,13 +99,10 @@ const ProfileScreen = () => {
         const updatedUser = await authService.getMe();
         updateUser(updatedUser);
 
-        Alert.alert('Success', 'Profile photo updated');
+        showSuccess('Profile photo updated successfully');
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        error.response?.data?.error || 'Failed to update profile photo'
-      );
+      showError(error.response?.data?.error || 'Failed to update profile photo');
     }
   };
 
@@ -120,13 +118,17 @@ const ProfileScreen = () => {
         setIdPhoto(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to select image');
+      showError('Failed to select image');
     }
   };
 
   const handleSubmitVerification = async () => {
+    if (!user?.profileImage) {
+      showError('Please upload a profile picture first before submitting ID verification');
+      return;
+    }
     if (!idNumber || !idPhoto) {
-      Alert.alert('Error', 'Please fill in ID number and upload ID photo');
+      showError('Please fill in ID number and upload ID photo');
       return;
     }
 
@@ -149,13 +151,13 @@ const ProfileScreen = () => {
         }
       });
 
-      Alert.alert('Success', 'ID submitted for verification. Waiting for admin approval.');
+      showSuccess('ID submitted for verification. Waiting for admin approval.');
       const updatedUser = await authService.getMe();
       updateUser(updatedUser);
       setIdNumber('');
       setIdPhoto(null);
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.error || 'Failed to submit verification');
+      showError(error.response?.data?.error || 'Failed to submit verification');
     } finally {
       setUploading(false);
     }
@@ -163,40 +165,63 @@ const ProfileScreen = () => {
 
   const handleUpdateInformation = async () => {
     if (!firstName || !lastName || !phoneNumber) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showError('Please fill in all fields');
       return;
     }
 
-    setUpdating(true);
-    try {
-      const api = createAPI();
-      const fullName = `${firstName} ${lastName}`.trim();
-      
-      await api.put('/api/auth/me', {
-        name: fullName,
-        phone: phoneNumber
+    // Check if phone number changed
+    const phoneChanged = phoneNumber.trim() !== originalPhoneNumber.trim();
+    
+    if (phoneChanged) {
+      // Navigate to phone verification screen
+      router.push({
+        pathname: '/phone-verification',
+        params: {
+          phone: phoneNumber.trim(),
+          purpose: 'update_phone',
+          userId: user?.id,
+          firstName: firstName,
+          lastName: lastName
+        }
       });
+    } else {
+      // Just update name if phone hasn't changed
+      setUpdating(true);
+      try {
+        const api = createAPI();
+        const fullName = `${firstName} ${lastName}`.trim();
+        
+        await api.put('/api/auth/me', {
+          name: fullName,
+          phone: phoneNumber
+        });
 
-      const updatedUser = await authService.getMe();
-      updateUser(updatedUser);
-      Alert.alert('Success', 'Information updated successfully');
-    } catch (error) {
-      Alert.alert('Error', error.response?.data?.error || 'Failed to update information');
-    } finally {
-      setUpdating(false);
+        const updatedUser = await authService.getMe();
+        updateUser(updatedUser);
+        showSuccess('Information updated successfully');
+      } catch (error) {
+        showError(error.response?.data?.error || 'Failed to update information');
+      } finally {
+        setUpdating(false);
+      }
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
+    <View style={styles.container}>
+      <Header title="My Profile" />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.content}>
         {/* User Profile Section */}
         <View style={styles.card}>
           <View style={styles.avatarContainer}>
             {user?.profileImage ? (
               <Image
-                source={{ uri: `${getBaseURL()}/${user.profileImage}` }}
+                source={{ uri: getImageUri(user.profileImage) }}
                 style={styles.avatarImage}
+                onError={(error) => {
+                  console.error('❌ Profile image error:', error.nativeEvent.error, user.profileImage);
+                }}
               />
             ) : (
               <View style={styles.avatar}>
@@ -256,9 +281,12 @@ const ProfileScreen = () => {
                 existingIdSubmission.files.length > 0 && (
                   <Image
                     source={{
-                      uri: `${getBaseURL()}/${existingIdSubmission.files[0]}`
+                      uri: getImageUri(existingIdSubmission.files[0])
                     }}
                     style={styles.existingImage}
+                    onError={(error) => {
+                      console.error('❌ ID image error:', error.nativeEvent.error, existingIdSubmission.files[0]);
+                    }}
                   />
                 )}
             </View>
@@ -349,7 +377,8 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -357,6 +386,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff'
+  },
+  scrollView: {
+    flex: 1
   },
   content: {
     padding: 20,

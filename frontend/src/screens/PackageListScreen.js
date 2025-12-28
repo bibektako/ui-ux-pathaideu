@@ -5,9 +5,12 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  RefreshControl
+  RefreshControl,
+  Platform,
+  StatusBar
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import packagesService from '../services/packages';
 import useAuthStore from '../state/useAuthStore';
 
@@ -46,7 +49,7 @@ const PackageListScreen = () => {
     >
       <View style={styles.cardHeader}>
         <Text style={styles.code}>{item.code}</Text>
-        <Text style={styles.fee}>${item.fee}</Text>
+        <Text style={styles.fee}>Rs {item.fee}</Text>
       </View>
       <Text style={styles.route}>
         {item.origin.city} → {item.destination.city}
@@ -66,11 +69,18 @@ const PackageListScreen = () => {
 
   return (
     <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <StatusBar barStyle="dark-content" />
+        <Text style={styles.headerTitle}>All Packages</Text>
+      </View>
+
       <FlatList
         data={packages}
         renderItem={renderPackage}
         keyExtractor={(item) => item._id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyText}>No packages available</Text>
@@ -85,6 +95,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5'
+  },
+  header: {
+    backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'ios' ? 50 : StatusBar.currentHeight + 10,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+    marginTop: Platform.OS === 'ios' ? 0 : 10
+  },
+  listContent: {
+    paddingBottom: 20
   },
   card: {
     backgroundColor: '#fff',

@@ -12,15 +12,15 @@ Global ignores
 /frontend/ios
 
 # Ignore all screen files except Register, Login, and Home
-/frontend/src/screens/AdminPanelScreen.js
-/frontend/src/screens/CaptureScreen.js
+#/frontend/src/screens/AdminPanelScreen.js
+#/frontend/src/screens/CaptureScreen.js
 # /frontend/src/screens/CreatePackageScreen.js
 # /frontend/src/screens/CreateTripScreen.js
 # /frontend/src/screens/PackageDetailScreen.js
 # /frontend/src/screens/PackageListScreen.js
 # /frontend/src/screens/ProfileScreen.js
-/frontend/src/screens/SettingsScreen.js
-/frontend/src/screens/TrackingScreen.js
+#/frontend/src/screens/SettingsScreen.js
+#/frontend/src/screens/TrackingScreen.js
 /frontend/src/screens/WalletScreen.js
 
 # Ignore all other source directories
@@ -39,12 +39,12 @@ Global ignores
 /frontend/app/wallet.tsx
 # /frontend/app/profile.tsx
 # /frontend/app/settings.tsx
-/frontend/app/admin.tsx
+#/frontend/app/admin.tsx
 # /frontend/app/package-detail/
-/frontend/app/tracking/
+#/frontend/app/tracking/
 # /frontend/app/capture.tsx
 # /frontend/app/(tabs)/packages.tsx
-/frontend/app/(tabs)/notifications.tsx
+#/frontend/app/(tabs)/notifications.tsx
 # /frontend/app/(tabs)/settings.tsx
 
 # Ignore other project files

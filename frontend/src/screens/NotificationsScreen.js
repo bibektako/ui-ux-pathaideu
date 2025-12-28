@@ -5,9 +5,12 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import notificationsService from '../services/notifications';
 
 const timeAgo = (dateStr) => {
@@ -40,24 +43,47 @@ const badgeColor = (type) => {
 };
 
 const NotificationsScreen = () => {
+  const insets = useSafeAreaInsets();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = async () => {
+  const load = async (showRefreshing = false) => {
     try {
-      setLoading(true);
+      if (showRefreshing) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const data = await notificationsService.list();
       setItems(data || []);
+      console.log('📬 Loaded notifications:', data?.length || 0);
     } catch (error) {
+      console.error('❌ Error loading notifications:', error);
       setItems([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     load();
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      load(true);
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  // Refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      load();
+    }, [])
+  );
 
   const renderIcon = (type) => {
     if (type === 'offer') return <Ionicons name="gift-outline" size={22} color="#4B5563" />;
@@ -77,7 +103,13 @@ const NotificationsScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView 
+      style={styles.container} 
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} />
+      }
+    >
       <View style={styles.headerRow}>
         <Ionicons name="notifications-outline" size={22} color="#111827" />
         <Text style={styles.headerText}>Notification</Text>

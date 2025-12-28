@@ -1,4 +1,4 @@
-import PackageStatusScreen from '@/src/screens/PackageStatusScreen';
+import PackageDetailScreen from '@/src/screens/PackageDetailScreen';
 
-export default PackageStatusScreen;
+export default PackageDetailScreen;
 
