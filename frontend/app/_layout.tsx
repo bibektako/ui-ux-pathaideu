@@ -18,10 +18,15 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { loadBackendIP } = useAuthStore();
+  const { loadBackendIP, loadAuth } = useAuthStore();
 
   useEffect(() => {
-    loadBackendIP();
+    // Load backend IP and auth state on app start
+    const initialize = async () => {
+      await loadBackendIP();
+      await loadAuth();
+    };
+    initialize();
   }, []);
 
   return (

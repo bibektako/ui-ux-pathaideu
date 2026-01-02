@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import authService from "../services/auth";
 import { useToast, useLoading } from "../context/ToastContext";
+import useAuthStore from "../state/useAuthStore";
 
 const { width } = Dimensions.get("window");
 
@@ -25,6 +26,28 @@ const LoginScreen = () => {
   const router = useRouter();
   const { showError, showSuccess } = useToast();
   const { showLoading, hideLoading } = useLoading();
+  const { isAuthenticated, user, isLoadingAuth } = useAuthStore();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!isLoadingAuth && isAuthenticated) {
+      // Use setTimeout to ensure router is ready
+      const timer = setTimeout(() => {
+        if (user?.role === 'admin') {
+          router.replace('/admin');
+        } else {
+          router.replace('/(tabs)');
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, user, isLoadingAuth]);
+
+  // Show nothing while checking auth state
+  if (isLoadingAuth || isAuthenticated) {
+    return null;
+  }
 
   const handleLogin = async () => {
     if (!email || !password) {

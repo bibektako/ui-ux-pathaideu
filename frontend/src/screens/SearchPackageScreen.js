@@ -102,12 +102,12 @@ const SearchPackageScreen = () => {
         style={[
           styles.searchBox,
           {
-            borderColor: focused || query ? '#4A3AFF' : '#E5E7EB',
+            borderColor: focused || query ? '#007AFF' : '#E5E7EB',
             borderWidth: focused || query ? 2 : 1
           }
         ]}
       >
-        <Ionicons name="search-outline" size={18} color="#4A3AFF" style={styles.searchIcon} />
+        <Ionicons name="search-outline" size={18} color={focused || query ? '#007AFF' : '#9CA3AF'} style={styles.searchIcon} />
         <TextInput
           style={styles.input}
           placeholder="#PKG123456..."
@@ -123,7 +123,7 @@ const SearchPackageScreen = () => {
         />
       </View>
 
-      {loading ? <ActivityIndicator color="#4A3AFF" style={{ marginTop: 12 }} /> : null}
+      {loading ? <ActivityIndicator color="#007AFF" style={{ marginTop: 12 }} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {renderCard()}
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   searchBox: {
     borderWidth: 2,
-    borderColor: '#4A3AFF',
+    borderColor: '#007AFF',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,

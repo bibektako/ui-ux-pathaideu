@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Image,
   Switch,
   Alert,
@@ -37,7 +36,7 @@ const SettingsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
@@ -121,10 +120,7 @@ const SettingsScreen = () => {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => {
-              // Navigate to addresses page when implemented
-              console.log("Addresses pressed");
-            }}
+            onPress={() => router.push("/address")}
           >
             <View style={styles.menuItemLeft}>
               <Ionicons
@@ -140,19 +136,32 @@ const SettingsScreen = () => {
 
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => {
-              // Navigate to settings page when implemented
-              console.log("Settings pressed");
-            }}
+            onPress={() => router.push("/about-us")}
           >
             <View style={styles.menuItemLeft}>
               <Ionicons
-                name="settings-outline"
+                name="information-circle-outline"
                 size={20}
                 color="#333"
                 style={styles.menuIcon}
               />
-              <Text style={styles.menuItemText}>Settings</Text>
+              <Text style={styles.menuItemText}>About Us</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#999" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => router.push("/contact-us")}
+          >
+            <View style={styles.menuItemLeft}>
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color="#333"
+                style={styles.menuIcon}
+              />
+              <Text style={styles.menuItemText}>Contact Us</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#999" />
           </TouchableOpacity>
@@ -201,7 +210,7 @@ const SettingsScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

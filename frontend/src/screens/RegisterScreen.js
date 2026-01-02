@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -166,135 +165,143 @@ const RegisterScreen = () => {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
+      <View style={styles.content}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>Register</Text>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Username</Text>
-            <TextInput
-              style={[styles.input, errors.name && styles.inputError]}
-              placeholder="Enter your name"
-              placeholderTextColor="#B0B0B0"
-              value={name || ""}
-              onChangeText={(text) => {
-                setName(text || "");
-                validateField('name', text);
-              }}
-              onBlur={() => validateField('name', name)}
-              autoCapitalize="words"
-            />
-            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
-              placeholder="Enter your email"
-              placeholderTextColor="#B0B0B0"
-              value={email || ""}
-              onChangeText={(text) => {
-                setEmail(text || "");
-                validateField('email', text);
-              }}
-              onBlur={() => validateField('email', email)}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-            />
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              style={[styles.input, errors.phone && styles.inputError]}
-              placeholder="Enter your phone number"
-              placeholderTextColor="#B0B0B0"
-              value={phone || ""}
-              onChangeText={(text) => {
-                setPhone(text || "");
-                validateField('phone', text);
-              }}
-              onBlur={() => validateField('phone', phone)}
-              keyboardType="phone-pad"
-              autoCapitalize="none"
-              autoComplete="tel"
-            />
-            {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={[styles.passwordContainer, errors.password && styles.inputError]}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password"
-                placeholderTextColor="#B0B0B0"
-                value={password || ""}
-                onChangeText={(text) => {
-                  setPassword(text || "");
-                  validateField('password', text);
-                }}
-                onBlur={() => validateField('password', password)}
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                textContentType="oneTimeCode"
-                autoComplete="off"
-                passwordRules=""
-                keyboardType="default"
-              />
-              <TouchableOpacity
-                style={styles.eyeIcon}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color="#B0B0B0"
+            {/* Username Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Username</Text>
+              <View style={[styles.inputContainer, errors.name && styles.inputError]}>
+                <Ionicons name="person-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your name"
+                  placeholderTextColor="#BDC3C7"
+                  value={name || ""}
+                  onChangeText={(text) => {
+                    setName(text || "");
+                    validateField('name', text);
+                  }}
+                  onBlur={() => validateField('name', name)}
+                  autoCapitalize="words"
                 />
-              </TouchableOpacity>
+              </View>
+              {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
             </View>
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm password</Text>
-            <View style={[styles.passwordContainer, errors.confirmPassword && styles.inputError]}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Enter your password again"
-                placeholderTextColor="#B0B0B0"
-                value={confirmPassword || ""}
-                onChangeText={(text) => {
-                  setConfirmPassword(text || "");
-                  validateField('confirmPassword', text);
-                }}
-                onBlur={() => validateField('confirmPassword', confirmPassword)}
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-                textContentType="oneTimeCode"
-                autoComplete="off"
-                passwordRules=""
-                keyboardType="default"
-              />
-              <TouchableOpacity
-                style={styles.eyeIcon}
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <Ionicons
-                  name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
-                  size={20}
-                  color="#B0B0B0"
+            {/* Email Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Email</Text>
+              <View style={[styles.inputContainer, errors.email && styles.inputError]}>
+                <Ionicons name="mail-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#BDC3C7"
+                  value={email || ""}
+                  onChangeText={(text) => {
+                    setEmail(text || "");
+                    validateField('email', text);
+                  }}
+                  onBlur={() => validateField('email', email)}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
                 />
-              </TouchableOpacity>
+              </View>
+              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
-            {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+
+            {/* Phone Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={[styles.inputContainer, errors.phone && styles.inputError]}>
+                <Ionicons name="call-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your phone number"
+                  placeholderTextColor="#BDC3C7"
+                  value={phone || ""}
+                  onChangeText={(text) => {
+                    setPhone(text || "");
+                    validateField('phone', text);
+                  }}
+                  onBlur={() => validateField('phone', phone)}
+                  keyboardType="phone-pad"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+              </View>
+              {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+            </View>
+
+            {/* Password Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Password</Text>
+              <View style={[styles.inputContainer, errors.password && styles.inputError]}>
+                <Ionicons name="lock-closed-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#BDC3C7"
+                  value={password || ""}
+                  onChangeText={(text) => {
+                    setPassword(text || "");
+                    validateField('password', text);
+                  }}
+                  onBlur={() => validateField('password', password)}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color="#7F8C8D"
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+            </View>
+
+            {/* Confirm Password Input */}
+            <View style={styles.inputWrapper}>
+              <Text style={styles.label}>Confirm password</Text>
+              <View style={[styles.inputContainer, errors.confirmPassword && styles.inputError]}>
+                <Ionicons name="lock-closed-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password again"
+                  placeholderTextColor="#BDC3C7"
+                  value={confirmPassword || ""}
+                  onChangeText={(text) => {
+                    setConfirmPassword(text || "");
+                    validateField('confirmPassword', text);
+                  }}
+                  onBlur={() => validateField('confirmPassword', confirmPassword)}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={styles.eyeIcon}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color="#7F8C8D"
+                  />
+                </TouchableOpacity>
+              </View>
+              {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+            </View>
           </View>
 
           <TouchableOpacity
@@ -322,7 +329,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 };
@@ -332,8 +339,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  scrollContent: {
-    flexGrow: 1,
+  content: {
+    flex: 1,
     paddingHorizontal: 25,
     paddingTop: 80,
     paddingBottom: 40,
@@ -349,42 +356,39 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 22,
+  },
+  inputWrapper: {
+    marginBottom: 22,
   },
   label: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#444",
-    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2C3E50",
+    marginBottom: 10,
   },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    fontSize: 15,
-    borderWidth: 1,
-    borderColor: "#E8E8E8", // Lighter border
-    color: "#333",
-  },
-  passwordContainer: {
+  inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E8ECF4",
   },
-  passwordInput: {
+  inputIcon: {
+    paddingLeft: 16,
+  },
+  input: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    fontSize: 15,
-    color: "#333",
+    padding: 16,
+    paddingLeft: 12,
+    fontSize: 16,
+    color: "#2C3E50",
   },
   eyeIcon: {
-    padding: 10,
-    paddingRight: 15,
+    padding: 16,
+    paddingLeft: 12,
+    paddingRight: 16,
   },
   forgotPassword: {
     alignSelf: "flex-end",
@@ -407,13 +411,13 @@ const styles = StyleSheet.create({
     // Removed heavy shadow to match flat design
   },
   inputError: {
-    borderColor: "#F44336", // Red border for errors (Von Restorff Effect - make errors stand out)
+    borderColor: "#F44336",
     borderWidth: 1.5,
   },
   errorText: {
     color: "#F44336",
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 6,
     marginLeft: 2,
   },
   buttonDisabled: {
