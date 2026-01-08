@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -102,9 +103,15 @@ const LoginScreen = () => {
         {/* Logo - Top Left */}
         <View style={styles.logoContainer}>
           <View style={styles.logoBox}>
-            <Ionicons name="car-outline" size={28} color="#0047AB" />
+            <View style={styles.logoIconContainer}>
+              <Image
+                source={require('../../assets/images/app-logo.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.logoText}>Pathaideu</Text>
           </View>
-          <Text style={styles.logoText}>Pathaideu</Text>
         </View>
       </View>
 
@@ -116,14 +123,13 @@ const LoginScreen = () => {
         </Text>
 
         <View style={styles.inputGroup}>
-          {/* Email Input */}
+          {/* Username Input */}
           <View style={styles.inputWrapper}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Username</Text>
             <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your email"
+                placeholder="Enter your username"
                 placeholderTextColor="#BDC3C7"
                 value={email}
                 onChangeText={setEmail}
@@ -138,7 +144,6 @@ const LoginScreen = () => {
           <View style={styles.inputWrapper}>
             <Text style={styles.label}>Password</Text>
             <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Enter your password"
@@ -206,7 +211,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topSection: {
-    height: "35%",
+    height: "30%",
     backgroundColor: "#0047AB",
     position: "relative",
     overflow: "hidden",
@@ -217,7 +222,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "70%",
-    opacity: 0.4,
+    opacity: 0.3,
   },
   skyline: {
     flexDirection: "row",
@@ -236,51 +241,66 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     left: 20,
-    flexDirection: "row",
-    alignItems: "center",
     zIndex: 10,
   },
   logoBox: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#fff",
-    borderRadius: 10,
+    width: 120,
+    height: 140,
+    backgroundColor: "#0047AB",
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    borderWidth: 4,
+    borderColor: "#fff",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  logoIconContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 8,
+  },
+  logoImage: {
+    width: 60,
+    height: 60,
+    tintColor: "#fff",
   },
   logoText: {
     color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
+    fontStyle: "italic",
     letterSpacing: 0.5,
+    textAlign: "center",
   },
   formSection: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 30,
     paddingTop: 40,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -20,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    marginTop: 0,
   },
   title: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "bold",
     color: "#2C3E50",
     marginBottom: 8,
-    textAlign: "center",
+    textAlign: "left",
     letterSpacing: -0.5,
   },
   welcomeText: {
     fontSize: 15,
     color: "#7F8C8D",
-    textAlign: "center",
+    textAlign: "left",
     marginBottom: 35,
     fontWeight: "400",
   },
@@ -300,17 +320,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 12,
-    borderWidth: 1.5,
+    borderRadius: 8,
+    borderWidth: 1,
     borderColor: "#E8ECF4",
-  },
-  inputIcon: {
-    paddingLeft: 16,
   },
   input: {
     flex: 1,
     padding: 16,
-    paddingLeft: 12,
+    paddingLeft: 16,
     fontSize: 16,
     color: "#2C3E50",
   },
@@ -330,17 +347,17 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     backgroundColor: "#0047AB",
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 18,
     alignItems: "center",
     marginTop: 15,
     marginBottom: 25,
     minHeight: 56,
     shadowColor: "#0047AB",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   buttonDisabled: {
     opacity: 0.6,

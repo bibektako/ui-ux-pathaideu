@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Image,
   Modal
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import packagesService from '../services/packages';
 import gpsService from '../utils/gps';
@@ -47,6 +47,7 @@ const QUANTITY_OPTIONS = ['1', '2', '3', '4', '5'];
 
 const CreatePackageScreen = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { user } = useAuthStore();
   const { showError, showSuccess } = useToast();
   const { showLoading, hideLoading } = useLoading();
@@ -78,6 +79,65 @@ const CreatePackageScreen = () => {
     fee: '',
     packagePhoto: null
   });
+
+  // Pre-fill form data if relisting or editing
+  useEffect(() => {
+    if (params.relist === 'true' || params.edit === 'true') {
+      setFormData(prev => ({
+        ...prev,
+        itemName: params.itemName || '',
+        quantity: params.quantity || '1',
+        receiverName: params.receiverName || '',
+        receiverPhone: params.receiverPhone || '',
+        pickupLocation: params.pickupAddress ? `${params.pickupCity || ''}, ${params.pickupAddress}`.trim() : (params.pickupCity || ''),
+        dropoffLocation: params.dropoffAddress ? `${params.dropoffCity || ''}, ${params.dropoffAddress}`.trim() : (params.dropoffCity || ''),
+        pickupCoordinates: {
+          lat: params.pickupLat ? parseFloat(params.pickupLat) : 0,
+          lng: params.pickupLng ? parseFloat(params.pickupLng) : 0
+        },
+        dropoffCoordinates: {
+          lat: params.dropoffLat ? parseFloat(params.dropoffLat) : 0,
+          lng: params.dropoffLng ? parseFloat(params.dropoffLng) : 0
+        },
+        fee: params.fee || '',
+        payer: params.payer || 'sender'
+      }));
+
+      // If coordinates are available, mark location as completed
+      if (params.pickupLat && params.dropoffLat) {
+        setLocationCompleted(true);
+      }
+
+      // If basic details are available, mark package details as completed
+      if (params.itemName && params.receiverName && params.receiverPhone && params.fee) {
+        setPackageDetailsCompleted(true);
+        // Auto-advance to location tab if details are complete
+        if (params.pickupLat && params.dropoffLat) {
+          setActiveTab('photo');
+        } else {
+          setActiveTab('location');
+        }
+      }
+
+      // Load photos if available
+      if (params.photos) {
+        const photoUrls = params.photos.split(',').filter(url => url.trim());
+        if (photoUrls.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            packagePhoto: photoUrls[0] // Use first photo
+          }));
+        }
+      }
+
+      if (params.edit === 'true') {
+        showSuccess('Package details loaded. Review and update to save changes.');
+      } else {
+        showSuccess('Package details loaded. Review and submit to relist.');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.relist, params.edit]);
 
   // Error states for all fields
   const [errors, setErrors] = useState({
@@ -404,14 +464,27 @@ const CreatePackageScreen = () => {
         }
       }
 
-      showLoading('Saving package...');
-      await packagesService.create(packageData);
-      hideLoading();
-      showSuccess('Package request created successfully!');
+      showLoading(params.edit === 'true' ? 'Updating package...' : 'Saving package...');
+      
+      if (params.edit === 'true' && params.packageId) {
+        // Update existing package
+        await packagesService.update(params.packageId, packageData);
+        hideLoading();
+        showSuccess('Package updated successfully!');
+      } else {
+        // Create new package
+        await packagesService.create(packageData);
+        hideLoading();
+        showSuccess('Package request created successfully!');
+      }
+      
       setTimeout(() => router.back(), 1000);
     } catch (error) {
       hideLoading();
-      showError(error.response?.data?.error || error.message || 'Failed to create package');
+      const errorMessage = params.edit === 'true' 
+        ? (error.response?.data?.error || error.message || 'Failed to update package')
+        : (error.response?.data?.error || error.message || 'Failed to create package');
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -713,7 +786,7 @@ const CreatePackageScreen = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <Header title="Send Package" />
+      <Header title={params.edit === 'true' ? 'Edit Package' : 'Send Package'} />
       
       {/* Tab Navigation */}
       <View style={styles.tabContainer}>
@@ -781,7 +854,9 @@ const CreatePackageScreen = () => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>Create Request</Text>
+              <Text style={styles.submitButtonText}>
+                {params.edit === 'true' ? 'Update Package' : 'Create Request'}
+              </Text>
             )}
           </TouchableOpacity>
         ) : (

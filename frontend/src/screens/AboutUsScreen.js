@@ -5,7 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Linking
+  Linking,
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,7 +31,11 @@ const AboutUsScreen = () => {
         {/* App Logo/Icon Section */}
         <View style={styles.logoSection}>
           <View style={styles.logoContainer}>
-            <Ionicons name="car" size={60} color="#007AFF" />
+            <Image
+              source={require('../../assets/images/app-logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.appName}>Pathaideu</Text>
           <Text style={styles.appTagline}>Peer-to-Peer Package Delivery</Text>
@@ -187,6 +192,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    padding: 20,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   appName: {
     fontSize: 28,
@@ -295,4 +305,5 @@ const styles = StyleSheet.create({
 });
 
 export default AboutUsScreen;
+
 

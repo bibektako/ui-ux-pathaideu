@@ -239,6 +239,10 @@ const PackageDetailScreen = () => {
     packageData.deliveryOTP && 
     packageData.status !== 'delivered';
   
+  // Check if package is expired and user is sender
+  const isExpired = packageData.status === 'expired';
+  const canRelist = isExpired && isSender;
+  
   // Debug logging
   if (isSender && packageData) {
     console.log('🔍 Delivery Verification Check:', {
@@ -248,6 +252,32 @@ const PackageDetailScreen = () => {
       canVerifyDelivery
     });
   }
+
+  const handleRelist = () => {
+    // Navigate to create package screen with package data as params
+    router.push({
+      pathname: '/create-package',
+      params: {
+        relist: 'true',
+        packageId: packageData._id,
+        itemName: packageData.description || '',
+        quantity: '1', // Default quantity
+        receiverName: packageData.receiverName || '',
+        receiverPhone: packageData.receiverPhone || '',
+        pickupCity: packageData.origin?.city || '',
+        pickupAddress: packageData.origin?.address || '',
+        pickupLat: packageData.origin?.coordinates?.lat?.toString() || '',
+        pickupLng: packageData.origin?.coordinates?.lng?.toString() || '',
+        dropoffCity: packageData.destination?.city || '',
+        dropoffAddress: packageData.destination?.address || '',
+        dropoffLat: packageData.destination?.coordinates?.lat?.toString() || '',
+        dropoffLng: packageData.destination?.coordinates?.lng?.toString() || '',
+        fee: packageData.fee?.toString() || '',
+        payer: packageData.payer || 'sender',
+        photos: packageData.photos?.join(',') || ''
+      }
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -262,6 +292,14 @@ const PackageDetailScreen = () => {
           <Ionicons name="location" size={18} color="#007AFF" />
           <Text style={styles.trackLiveText}>Track Live</Text>
         </TouchableOpacity>
+      )}
+
+      {/* Expired Status Badge - Top Right (same position as Track Live) */}
+      {isExpired && (
+        <View style={[styles.expiredBadge, { top: insets.top + 68 + 8 }]}>
+          <Ionicons name="time-outline" size={18} color="#F44336" />
+          <Text style={styles.expiredBadgeText}>Expired</Text>
+        </View>
       )}
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
@@ -433,6 +471,23 @@ const PackageDetailScreen = () => {
           </TouchableOpacity>
         )}
 
+        {canRelist && (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.relistButton]}
+            onPress={handleRelist}
+            disabled={actionLoading}
+          >
+            {actionLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="refresh-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+                <Text style={styles.actionButtonText}>Relist Package</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
+
         {canVerifyDelivery && (
           <View style={styles.verificationSection}>
             <View style={styles.verificationBanner}>
@@ -534,6 +589,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: '#007AFF'
+  },
+  expiredBadge: {
+    position: 'absolute',
+    right: 16,
+    zIndex: 1000,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#F44336'
+  },
+  expiredBadgeText: {
+    marginLeft: 6,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#F44336'
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -756,6 +835,12 @@ const styles = StyleSheet.create({
   },
   deliverButton: {
     backgroundColor: '#FF9800'
+  },
+  relistButton: {
+    backgroundColor: '#007AFF',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   actionButtonText: {
     color: '#fff',

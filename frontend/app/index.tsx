@@ -43,11 +43,20 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && !isLoading && !hasNavigated) {
       setHasNavigated(true);
-      // Always navigate to onboarding after splash screen
-      // This is the first 2 pages: Splash -> Onboarding
-      router.replace('/onboarding');
+      // Navigation flow after splash:
+      // 1. If user is already authenticated (valid token), go directly to home tabs
+      // 2. If not authenticated and hasn't seen onboarding, go to onboarding
+      // 3. If not authenticated and has seen onboarding (new user or expired token), go to login
+
+      if (isAuthenticated) {
+        router.replace('/(tabs)');
+      } else if (!hasSeenOnboarding) {
+        router.replace('/onboarding');
+      } else {
+        router.replace('/login');
+      }
     }
-  }, [showSplash, isLoading, hasNavigated]);
+  }, [showSplash, isLoading, hasNavigated, isAuthenticated, hasSeenOnboarding, router]);
 
   if (showSplash || isLoading) {
     return <SplashScreen />;

@@ -19,7 +19,11 @@ const SplashScreen = () => {
       <View style={styles.content}>
         {/* App Icon/Logo */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logoIcon}>🚚</Text>
+          <Image
+            source={require('../../assets/images/app-logo.png')}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
         </View>
         
         {/* App Name */}
@@ -54,8 +58,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  logoIcon: {
-    fontSize: 60,
+  logoImage: {
+    width: 80,
+    height: 80,
   },
   appName: {
     fontSize: 42,
@@ -73,6 +78,7 @@ const styles = StyleSheet.create({
 });
 
 export default SplashScreen;
+
 
 
 

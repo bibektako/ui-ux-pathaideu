@@ -46,10 +46,16 @@ const HomeScreen = () => {
       // Create recent activity from packages and trips
       const activity = [];
       pkgs.forEach(pkg => {
+        let title = 'New delivery request';
+        if (pkg.status === 'delivered') {
+          title = 'Package delivered';
+        } else if (pkg.status === 'expired') {
+          title = 'Package expired';
+        }
         activity.push({
           id: pkg._id,
           type: 'package',
-          title: pkg.status === 'delivered' ? 'Package delivered' : 'New delivery request',
+          title,
           time: pkg.createdAt || pkg.deliveredAt,
           status: pkg.status
         });
@@ -184,10 +190,15 @@ const HomeScreen = () => {
               <View style={styles.activityLeft}>
                 <View style={[
                   styles.activityDot,
-                  activity.status === 'delivered' ? styles.activityDotActive : styles.activityDotInactive
+                  activity.status === 'delivered' ? styles.activityDotActive : 
+                  activity.status === 'expired' ? styles.activityDotExpired : 
+                  styles.activityDotInactive
                 ]} />
                 <View style={styles.activityTextContainer}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
+                  <Text style={[
+                    styles.activityTitle,
+                    activity.status === 'expired' && styles.activityTitleExpired
+                  ]}>{activity.title}</Text>
                   <Text style={styles.activityTime}>{getTimeAgo(activity.time)}</Text>
                 </View>
               </View>
@@ -370,8 +381,14 @@ const styles = StyleSheet.create({
   activityDotActive: {
     backgroundColor: '#007AFF'
   },
+  activityDotExpired: {
+    backgroundColor: '#F44336'
+  },
   activityDotInactive: {
     backgroundColor: '#ccc'
+  },
+  activityTitleExpired: {
+    color: '#F44336'
   },
   activityTextContainer: {
     flex: 1

@@ -6,12 +6,9 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
 import useAuthStore from '../state/useAuthStore';
 
 const { width, height } = Dimensions.get('window');
@@ -26,89 +23,42 @@ const OnboardingScreen = () => {
     AsyncStorage.setItem(ONBOARDING_KEY, 'true');
   }, []);
 
-  // If user is already authenticated, they can skip to home
-  const handleSkip = () => {
-    if (isAuthenticated) {
-      router.replace('/(tabs)');
-    }
+  const handleNext = () => {
+    // Navigate to login page
+    router.replace('/login');
   };
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Section with Image */}
-        <View style={styles.headerSection}>
-          <LinearGradient
-            colors={['#007AFF', '#0051D5']}
-            style={styles.gradientHeader}
-          >
-            <View style={styles.imageContainer}>
-              <Text style={styles.mainIcon}>🚚</Text>
-            </View>
-            <Text style={styles.appName}>Pathaideu</Text>
-            <Text style={styles.slogan}>
-              Connect. Deliver. Trust.
-            </Text>
-            <Text style={styles.description}>
-              Your trusted peer-to-peer package delivery platform. 
-              Send packages with travelers or carry packages on your journey.
-            </Text>
-          </LinearGradient>
-        </View>
+      {/* Illustration Section - Top 60% */}
+      <View style={styles.illustrationSection}>
+        <Image
+          source={require('../../assets/images/onboarding page (1).png')}
+          style={styles.illustration}
+          resizeMode="contain"
+        />
+      </View>
 
-        {/* Features Section */}
-        <View style={styles.featuresSection}>
-          <View style={styles.featureItem}>
-            <Ionicons name="cube-outline" size={32} color="#007AFF" />
-            <Text style={styles.featureTitle}>Send Packages</Text>
-            <Text style={styles.featureText}>
-              Find travelers going your way and send packages safely
-            </Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="briefcase-outline" size={32} color="#007AFF" />
-            <Text style={styles.featureTitle}>Carry Packages</Text>
-            <Text style={styles.featureText}>
-              Earn money by carrying packages on your trips
-            </Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Ionicons name="location-outline" size={32} color="#007AFF" />
-            <Text style={styles.featureTitle}>Real-time Tracking</Text>
-            <Text style={styles.featureText}>
-              Track your packages in real-time with GPS
-            </Text>
-          </View>
-        </View>
+      {/* Text Content Section - Middle 20% */}
+      <View style={styles.textSection}>
+        <Text style={styles.heading}>
+          Monitor Your Package's Journey At Every Stage.
+        </Text>
+        <Text style={styles.subText}>
+          Keep track of your package's location in real-time.
+        </Text>
+      </View>
 
-        {/* Action Buttons */}
-        <View style={styles.actionsSection}>
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={() => router.push('/register')}
-            activeOpacity={0.8}
-          >
-            <LinearGradient
-              colors={['#007AFF', '#0051D5']}
-              style={styles.buttonGradient}
-            >
-              <Text style={styles.primaryButtonText}>Create Account</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => router.push('/login')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.secondaryButtonText}>Login</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      {/* Next Button Section - Bottom 20% */}
+      <View style={styles.buttonSection}>
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={handleNext}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -116,138 +66,66 @@ const OnboardingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F5F7FA',
   },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  headerSection: {
-    width: '100%',
-  },
-  gradientHeader: {
-    paddingTop: 60,
-    paddingBottom: 50,
-    paddingHorizontal: 30,
-    alignItems: 'center',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  imageContainer: {
-    width: 140,
-    height: 140,
-    borderRadius: 35,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  illustrationSection: {
+    flex: 0.6,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  mainIcon: {
-    fontSize: 70,
-  },
-  appName: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 8,
-    letterSpacing: 1,
-  },
-  slogan: {
-    fontSize: 20,
-    color: 'rgba(255, 255, 255, 0.95)',
-    fontWeight: '600',
-    marginBottom: 16,
-    letterSpacing: 0.5,
-  },
-  description: {
-    fontSize: 15,
-    color: 'rgba(255, 255, 255, 0.85)',
-    textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
-    fontWeight: '300',
-  },
-  featuresSection: {
-    padding: 30,
+    backgroundColor: '#E8F0F5',
     paddingTop: 40,
+    paddingHorizontal: 20,
   },
-  featureItem: {
+  illustration: {
+    width: width * 0.9,
+    height: '100%',
+  },
+  textSection: {
+    flex: 0.2,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 35,
+    paddingHorizontal: 30,
+    paddingTop: 20,
   },
-  featureTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: '#2C3E50',
-    marginTop: 12,
-    marginBottom: 8,
+    textAlign: 'center',
+    marginBottom: 12,
+    lineHeight: 32,
   },
-  featureText: {
-    fontSize: 15,
+  subText: {
+    fontSize: 16,
     color: '#7F8C8D',
     textAlign: 'center',
-    lineHeight: 22,
-    paddingHorizontal: 20,
+    lineHeight: 24,
   },
-  actionsSection: {
-    padding: 30,
-    paddingBottom: 50,
+  buttonSection: {
+    flex: 0.2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+    paddingBottom: 40,
   },
-  primaryButton: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: 16,
-    shadowColor: '#007AFF',
+  nextButton: {
+    backgroundColor: '#0047AB',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    minWidth: width * 0.7,
+    alignItems: 'center',
+    shadowColor: '#0047AB',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
-  buttonGradient: {
-    paddingVertical: 18,
-    paddingHorizontal: 30,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  primaryButtonText: {
+  nextButtonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
     letterSpacing: 0.5,
-    marginRight: 8,
-  },
-  buttonIcon: {
-    marginLeft: 4,
-  },
-  secondaryButton: {
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#007AFF',
-    paddingVertical: 16,
-    paddingHorizontal: 30,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  secondaryButtonText: {
-    color: '#007AFF',
-    fontSize: 18,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  skipButton: {
-    marginTop: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  skipButtonText: {
-    color: '#7F8C8D',
-    fontSize: 16,
-    fontWeight: '500',
   },
 });
 

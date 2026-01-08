@@ -16,6 +16,7 @@ import Header from '../components/Header';
 const statusMeta = {
   delivered: { label: 'Delivered', color: '#0B63E6', bg: '#E6F0FF' },
   cancelled: { label: 'Cancelled', color: '#E53935', bg: '#FCE8E6' },
+  expired: { label: 'Expired', color: '#F44336', bg: '#FFEBEE' },
   picked_up: { label: 'Picked Up', color: '#0B63E6', bg: '#E6F0FF' },
   in_transit: { label: 'In Transit', color: '#0B63E6', bg: '#E6F0FF' },
   accepted: { label: 'Accepted', color: '#0B63E6', bg: '#E6F0FF' },
@@ -71,6 +72,7 @@ const HistoryScreen = () => {
 
   const renderIcon = (status) => {
     if (status === 'cancelled') return <Ionicons name="close-circle-outline" size={18} color="#E53935" />;
+    if (status === 'expired') return <Ionicons name="time-outline" size={18} color="#F44336" />;
     if (status === 'delivered') return <Ionicons name="checkmark-done-circle-outline" size={18} color="#0B63E6" />;
     if (status === 'picked_up' || status === 'in_transit' || status === 'accepted') {
       return <Ionicons name="cube-outline" size={18} color="#0B63E6" />;
@@ -104,11 +106,17 @@ const HistoryScreen = () => {
           onPress={() => router.push(`/package-detail/${pkg._id}`)}
         >
           <View style={styles.topRow}>
-            <View style={styles.iconWrapper}>
+            <View style={[
+              styles.iconWrapper,
+              pkg.status === 'expired' && styles.iconWrapperExpired
+            ]}>
               {renderIcon(pkg.status)}
             </View>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>{pkg.description || 'Package'}</Text>
+              <Text style={[
+                styles.title,
+                pkg.status === 'expired' && styles.titleExpired
+              ]}>{pkg.description || 'Package'}</Text>
               <Text style={styles.date}>{formatDate(pkg.createdAt)}</Text>
             </View>
             {renderStatusBadge(pkg.status)}
@@ -178,6 +186,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8
+  },
+  iconWrapperExpired: {
+    backgroundColor: '#FFEBEE'
+  },
+  titleExpired: {
+    color: '#F44336'
   },
   icon: {
     fontSize: 18
