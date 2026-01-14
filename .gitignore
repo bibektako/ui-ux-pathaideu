@@ -1,0 +1,55 @@
+Global ignores
+.DS_Store
+
+# Backend Node.js ignores
+/backend/node_modules
+/backend/package-lock.json
+/frontend/package-lock.json
+
+# Frontend React Native ignores
+/frontend/node_modules
+/frontend/android
+/frontend/ios
+
+# Ignore all screen files except Register, Login, and Home
+#/frontend/src/screens/AdminPanelScreen.js
+#/frontend/src/screens/CaptureScreen.js
+# /frontend/src/screens/CreatePackageScreen.js
+# /frontend/src/screens/CreateTripScreen.js
+# /frontend/src/screens/PackageDetailScreen.js
+# /frontend/src/screens/PackageListScreen.js
+# /frontend/src/screens/ProfileScreen.js
+#/frontend/src/screens/SettingsScreen.js
+#/frontend/src/screens/TrackingScreen.js
+/frontend/src/screens/WalletScreen.js
+
+# Ignore all other source directories
+/frontend/src/components/
+/frontend/src/services/
+/frontend/src/utils/
+/frontend/src/state/
+
+# Ignore backend files
+/backend/
+
+# Ignore app routes (except what's needed for login/register/home)
+# /frontend/app/create-package.tsx
+# /frontend/app/create-trip.tsx
+# /frontend/app/packages.tsx
+/frontend/app/wallet.tsx
+# /frontend/app/profile.tsx
+# /frontend/app/settings.tsx
+#/frontend/app/admin.tsx
+# /frontend/app/package-detail/
+#/frontend/app/tracking/
+# /frontend/app/capture.tsx
+# /frontend/app/(tabs)/packages.tsx
+#/frontend/app/(tabs)/notifications.tsx
+# /frontend/app/(tabs)/settings.tsx
+
+# Ignore other project files
+*.md
+!README.md
+/PROJECT_SUMMARY.md
+/QUICK_START.md
+/ROLE_CHANGES.md
