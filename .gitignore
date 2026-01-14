@@ -1,6 +1,13 @@
 Global ignores
 .DS_Store
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
 # Backend Node.js ignores
 /backend/node_modules
 /backend/package-lock.json
@@ -47,9 +54,8 @@ Global ignores
 #/frontend/app/(tabs)/notifications.tsx
 # /frontend/app/(tabs)/settings.tsx
 
-# Ignore other project files
+# Ignore all markdown files except README.md files
 *.md
 !README.md
-/PROJECT_SUMMARY.md
-/QUICK_START.md
-/ROLE_CHANGES.md
+# Allow README.md in any directory
+!**/README.md

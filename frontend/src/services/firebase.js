@@ -1,19 +1,23 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, get } from "firebase/database";
+import Constants from "expo-constants";
 
-// Firebase configuration
-// TODO: Replace with Firebase project configuration
+// Firebase configuration from environment variables
+// Set these in your .env file or via Expo's environment variable system
 const firebaseConfig = {
-  apiKey: "AIzaSyAJ3fEKkfB-F925tXonxTWm10Fpfm5Tq0o",
-  authDomain: "pathaideu-558a6.firebaseapp.com",
-  databaseURL:
-    "https://pathaideu-558a6-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "pathaideu-558a6",
-  storageBucket: "pathaideu-558a6.firebasestorage.app",
-  messagingSenderId: "386606523386",
-  appId: "1:386606523386:web:bac3d2cd46cef0aae6fa43",
-  measurementId: "G-MXRWRSEE35",
+  apiKey: Constants.expoConfig?.extra?.firebaseApiKey || process.env.EXPO_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: Constants.expoConfig?.extra?.firebaseAuthDomain || process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || "pathaideu-558a6.firebaseapp.com",
+  databaseURL: Constants.expoConfig?.extra?.firebaseDatabaseURL || process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL || "https://pathaideu-558a6-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: Constants.expoConfig?.extra?.firebaseProjectId || process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || "pathaideu-558a6",
+  storageBucket: Constants.expoConfig?.extra?.firebaseStorageBucket || process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || "pathaideu-558a6.firebasestorage.app",
+  messagingSenderId: Constants.expoConfig?.extra?.firebaseMessagingSenderId || process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "386606523386",
+  appId: Constants.expoConfig?.extra?.firebaseAppId || process.env.EXPO_PUBLIC_FIREBASE_APP_ID || "1:386606523386:web:bac3d2cd46cef0aae6fa43",
+  measurementId: Constants.expoConfig?.extra?.firebaseMeasurementId || process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-MXRWRSEE35",
 };
+
+if (!firebaseConfig.apiKey) {
+  console.warn("⚠️ Firebase API key not configured. Please set EXPO_PUBLIC_FIREBASE_API_KEY in your .env file or app.json extra field.");
+}
 
 // Initialize Firebase
 let app;
