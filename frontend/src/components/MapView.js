@@ -1,6 +1,6 @@
 import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 
 const CustomMapView = forwardRef(({ origin, destination, trackingPoints = [], currentLocation = null }, ref) => {
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -75,17 +75,11 @@ const CustomMapView = forwardRef(({ origin, destination, trackingPoints = [], cu
     <View style={styles.container}>
       <MapView
         ref={mapViewRef}
+        provider={PROVIDER_GOOGLE}
         style={styles.map}
         initialRegion={region}
         region={region}
-        mapType="none"
       >
-        {/* OpenStreetMap Tiles */}
-        <UrlTile
-          urlTemplate="https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maximumZ={19}
-          flipY={false}
-        />
 
         {origin && Marker && (
           <Marker

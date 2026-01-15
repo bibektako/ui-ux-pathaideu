@@ -33,7 +33,7 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
   const R = 6371; // Earth's radius in km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = 
+  const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
@@ -68,21 +68,21 @@ const TrackingScreen = () => {
 
   useEffect(() => {
     loadPackage();
-    
+
     // Determine user role and start appropriate tracking
     const initTracking = async () => {
       try {
         const pkg = await packagesService.getById(id);
         const travellerId = pkg.travellerId?._id || pkg.travellerId;
         const isTraveller = travellerId && (travellerId.toString() === user?.id?.toString());
-        
+
         console.log('🔍 Tracking initialization:', {
           packageId: id,
           travellerId: travellerId?.toString(),
           userId: user?.id?.toString(),
           isTraveller
         });
-        
+
         if (isTraveller) {
           // Courier: Start background location tracking
           console.log('✅ User is traveller - starting courier tracking');
@@ -96,7 +96,7 @@ const TrackingScreen = () => {
         console.error('❌ Error initializing tracking:', error);
       }
     };
-    
+
     // Wait for user to be loaded before initializing
     if (user?.id) {
       initTracking();
@@ -140,14 +140,24 @@ const TrackingScreen = () => {
     try {
       // Start background tracking service
       await locationTrackingService.startTracking(id);
-      
+
       // Get initial location for display
       const initialLocation = await gpsService.getCurrentLocation();
       setCurrentLocation(initialLocation);
-      
+
       // Watch position for UI updates (Firebase updates handled by service)
       const subscription = gpsService.watchPosition((location) => {
         setCurrentLocation(location);
+
+        // Auto-center map for traveller
+        if (mapRef.current && location) {
+          mapRef.current.animateToRegion({
+            latitude: location.lat,
+            longitude: location.lng,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01
+          }, 1000);
+        }
       });
 
       hideLoading();
@@ -187,15 +197,15 @@ const TrackingScreen = () => {
         setCourierLocation(location);
         setIsCourierOnline(location.isOnline !== false);
         setLastSeen(location.lastSeen || location.timestamp);
-        
-        // Animate map to courier location
+
+        // Auto-center map on courier location for sender/recipient
         if (mapRef.current && location.lat && location.lng) {
           mapRef.current.animateToRegion({
             latitude: location.lat,
             longitude: location.lng,
             latitudeDelta: 0.01,
             longitudeDelta: 0.01
-          }, 1000); // 1 second animation
+          }, 1000);
         }
       });
     } catch (error) {
@@ -284,13 +294,13 @@ const TrackingScreen = () => {
   // Get relevant information based on user role
   const traveller = packageData.travellerId || {};
   const sender = packageData.senderId || {};
-  
+
   // For travellers: show drop location details
   // For senders: show delivery person details
-  const displayName = isTraveller 
+  const displayName = isTraveller
     ? packageData.receiverName || 'Recipient'
     : traveller.name || 'Delivery Person';
-  const displayPhone = isTraveller 
+  const displayPhone = isTraveller
     ? packageData.receiverPhone || ''
     : traveller.phone || '';
   const displayLabel = isTraveller ? 'Drop Location' : 'Delivery Person';
@@ -312,7 +322,7 @@ const TrackingScreen = () => {
           trackingPoints={packageData.tracking || []}
           currentLocation={courierLocation || currentLocation}
         />
-        
+
         {/* Estimated Time Overlay */}
         {estimatedTime && (isTraveller ? currentLocation : courierLocation) && (
           <View style={styles.timeOverlay}>
@@ -326,7 +336,7 @@ const TrackingScreen = () => {
             </View>
           </View>
         )}
-        
+
         {/* Show message when recipient is waiting for courier location */}
         {!isTraveller && !courierLocation && (
           <View style={styles.waitingOverlay}>

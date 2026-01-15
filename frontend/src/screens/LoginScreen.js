@@ -40,7 +40,7 @@ const LoginScreen = () => {
           router.replace('/(tabs)');
         }
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated, user, isLoadingAuth]);
@@ -85,22 +85,9 @@ const LoginScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       {/* Top Blue Section with Skyline - 35% of screen */}
+      {/* Top Blue Section */}
       <View style={styles.topSection}>
-        {/* City Skyline Illustration */}
-        <View style={styles.skylineContainer}>
-          <View style={styles.skyline}>
-            <View style={[styles.building, { height: 60, width: 35 }]} />
-            <View style={[styles.building, { height: 80, width: 45 }]} />
-            <View style={[styles.building, { height: 50, width: 30 }]} />
-            <View style={[styles.building, { height: 70, width: 40 }]} />
-            <View style={[styles.building, { height: 55, width: 35 }]} />
-            <View style={[styles.building, { height: 90, width: 50 }]} />
-            <View style={[styles.building, { height: 65, width: 38 }]} />
-            <View style={[styles.building, { height: 75, width: 42 }]} />
-          </View>
-        </View>
-
-        {/* Logo - Top Left */}
+        {/* Logo Card */}
         <View style={styles.logoContainer}>
           <View style={styles.logoBox}>
             <View style={styles.logoIconContainer}>
@@ -211,194 +198,153 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   topSection: {
-    height: "30%",
+    height: "35%",
     backgroundColor: "#0047AB",
-    position: "relative",
-    overflow: "hidden",
+    paddingTop: 60,
+    paddingLeft: 30,
+    justifyContent: "center",
   },
-  skylineContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "70%",
-    opacity: 0.3,
-  },
-  skyline: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-around",
-    height: "100%",
-    paddingHorizontal: 10,
-    paddingBottom: 0,
-  },
-  building: {
-    backgroundColor: "#0066CC",
-    borderRadius: 2,
-    marginHorizontal: 2,
-  },
+  // Removed skyline styles
   logoContainer: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    zIndex: 10,
+    marginBottom: 20,
   },
   logoBox: {
-    width: 120,
-    height: 140,
+    width: 100,
+    height: 100,
     backgroundColor: "#0047AB",
-    borderRadius: 16,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 4,
+    borderWidth: 2,
     borderColor: "#fff",
-    paddingVertical: 16,
-    paddingHorizontal: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
     elevation: 5,
   },
   logoIconContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-    marginBottom: 8,
+    justifyContent: "center",
   },
   logoImage: {
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40,
     tintColor: "#fff",
+    marginBottom: 5,
   },
   logoText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: "600",
     fontStyle: "italic",
-    letterSpacing: 0.5,
-    textAlign: "center",
   },
   formSection: {
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 30,
-    paddingTop: 40,
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    marginTop: 0,
+    paddingTop: 30,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "bold",
-    color: "#2C3E50",
+    color: "#1A1A1A",
     marginBottom: 8,
-    textAlign: "left",
-    letterSpacing: -0.5,
   },
   welcomeText: {
-    fontSize: 15,
-    color: "#7F8C8D",
-    textAlign: "left",
-    marginBottom: 35,
-    fontWeight: "400",
+    fontSize: 14,
+    color: "#808080",
+    marginBottom: 30,
   },
   inputGroup: {
-    marginBottom: 22,
+    marginBottom: 20,
   },
   inputWrapper: {
-    marginBottom: 22,
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2C3E50",
-    marginBottom: 10,
+    color: "#1A1A1A",
+    marginBottom: 8,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E8ECF4",
+    borderColor: "#E5E7EB",
+    height: 50,
   },
   input: {
     flex: 1,
-    padding: 16,
-    paddingLeft: 16,
-    fontSize: 16,
-    color: "#2C3E50",
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: "#1A1A1A",
   },
   eyeIcon: {
-    padding: 16,
-    paddingLeft: 12,
-    paddingRight: 16,
+    padding: 12,
   },
   forgotPassword: {
     alignSelf: "flex-end",
-    marginTop: 10,
+    marginTop: 8,
   },
   forgotPasswordText: {
     color: "#0047AB",
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   signInButton: {
     backgroundColor: "#0047AB",
-    borderRadius: 8,
-    padding: 18,
+    borderRadius: 12,
+    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 15,
-    marginBottom: 25,
-    minHeight: 56,
+    marginBottom: 24,
     shadowColor: "#0047AB",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
+    shadowRadius: 8,
+    elevation: 4,
   },
   signInButtonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 0.5,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   separator: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 25,
+    marginBottom: 24,
   },
   separatorLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E8ECF4",
+    backgroundColor: "#F3F4F6",
   },
   separatorText: {
-    marginHorizontal: 18,
-    color: "#95A5A6",
-    fontSize: 14,
+    marginHorizontal: 16,
+    color: "#9CA3AF",
+    fontSize: 12,
     fontWeight: "500",
   },
   registerLink: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 5,
-    marginBottom: 20,
   },
   registerLinkText: {
-    color: "#7F8C8D",
-    fontSize: 15,
+    color: "#6B7280",
+    fontSize: 14,
   },
   registerLinkButton: {
     color: "#0047AB",
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
+    marginLeft: 4,
   },
 });
 

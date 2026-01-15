@@ -8,15 +8,15 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import gpsService from '../utils/gps';
 
-const MapLocationPicker = ({ 
-  visible, 
-  onClose, 
-  onSelect, 
+const MapLocationPicker = ({
+  visible,
+  onClose,
+  onSelect,
   initialLocation = null,
   title = 'Select Location'
 }) => {
@@ -41,19 +41,19 @@ const MapLocationPicker = ({
       setLoading(true);
       const location = await gpsService.getCurrentLocation();
       const addr = await gpsService.reverseGeocode(location.lat, location.lng);
-      
+
       setRegion({
         latitude: location.lat,
         longitude: location.lng,
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       });
-      
+
       setSelectedLocation({
         lat: location.lat,
         lng: location.lng,
       });
-      
+
       setAddress(`${addr.address}, ${addr.city}`);
     } catch (error) {
       console.error('Error loading location:', error);
@@ -75,7 +75,7 @@ const MapLocationPicker = ({
   const handleMapPress = async (e) => {
     const { latitude, longitude } = e.nativeEvent.coordinate;
     setSelectedLocation({ lat: latitude, lng: longitude });
-    
+
     try {
       const addr = await gpsService.reverseGeocode(latitude, longitude);
       setAddress(`${addr.address}, ${addr.city}`);
@@ -124,6 +124,7 @@ const MapLocationPicker = ({
             </View>
           ) : (
             <MapView
+              provider={PROVIDER_GOOGLE}
               style={styles.map}
               region={region}
               onPress={handleMapPress}
